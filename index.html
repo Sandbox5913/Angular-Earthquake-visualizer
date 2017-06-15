@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html ng-app="BulgeApp">
+	<head>
+		<title>3dBulge</title>
+		<meta http-equiv="content-type" content="text/html" charset="utf-8"/>
+		<meta name="description" content="Real time 3d visualization of the seismic activity in Bárðarbunga" />
+		<meta name="keywords" content="bárðarbunga, bardarbunga, iceland, volcano, volcanoes, earthquakes, seismic activity, 3dbulge, bæring, baering, real time">
+		<meta property="og:title" content="3dBulge">
+		<meta property="og:description" content="Real time 3d visualization of the seismic activity in Bárðarbunga">
+		<meta property="og:image" content="http://baering.github.io/img/3dbulge_og.jpg">
+		<meta property="og:image:type" content="image/jpg">
+		<meta property="og:image:width" content="454">
+		<meta property="og:image:height" content="252">
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://baering.github.io/" />
+		<link rel="image_src" type="image/jpeg" href="http://baering.github.io/img/3dbulge_og.jpg" />
+		<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+	</head>
+	<body>
+
+
+
+		<div ng-controller="MapController" class="container-fluid">
+			<div class="row">
+				<div class="col-lg-5 col-md-12 col-xs-12">
+					<h2 ng-show="loading" class="text-center" style="color: #fff">Loading data</h2>
+
+					<div class="row">
+						<div class="col-md-4 col-xs-4">
+							<p>
+								Displaying 
+								<span ng-show="graphDisplayOnlyVerified"><strong>verified</strong> earthquakes</span>
+								<span ng-show="!graphDisplayOnlyVerified"><strong>all</strong> earthquakes</span>
+							</p>
+							<button class="btn btn-sm btn-default" ng-click="graphDisplayOnlyVerified = !graphDisplayOnlyVerified; graphFilterChange()">
+								<span ng-show="graphDisplayOnlyVerified">Show all earthquakes</span>
+								<span ng-show="!graphDisplayOnlyVerified">Show verified earthquakes</span>
+							</button>
+						</div>
+						<div class="col-md-4 col-xs-4">
+							<p class="text-center" title="Move the slider below to change it">Graph displaying last <strong>{{ graphDisplayHours }}</strong> hours</p>
+							<input type="range" min="1" max="48" ng-model="graphDisplayHours" class="text-center graph-hours" ng-change="graphFilterChange()" />
+						</div>
+						<div class="col-md-4 col-xs-4">
+							<p class="text-center" title="Move the slider below to change it">Magnitude greater than <strong>{{ graphDisplayQuakeSize }}</strong></p>
+							<input type="range" min="0" max="4" step="0.2" ng-model="graphDisplayQuakeSize" class="text-center graph-hours" ng-change="graphFilterChange()" />
+						</div>
+					</div>
+
+					<div id="volcano-chart" style="width: 95%"></div>
+				</div>
+
+				<div class="col-lg-7 col-md-12 col-xs-12">
+					<div class="row" id="upper-top-right">
+					
+						<div class="col-md-12 col-xs-12">
+							<p class="text-muted">Showing last <strong>{{ numberOfEarthquakesDisplayedInTable }}</strong> below</p>
+							<div class="quake-list">
+								<table class="table table-striped table-hover">
+									<thead>
+										<th>Verified</th>
+										<th>Magnitude</th>
+										<th>Time</th>
+										<th>Depth</th>
+									</thead>
+									<tbody>
+										<tr ng-repeat="earthquake in earthquakes | orderBy: 'occuredAt':true | limitTo: numberOfEarthquakesDisplayedInTable" class="{{ earthquakeTableColor(earthquake) }}" ng-mouseenter="mouseOverEarthquake(earthquake)" ng-mouseleave="mouseOutEarthquake(earthquake)">
+											<td>
+												<span class="glyphicon" ng-class="{ 'glyphicon-ok earthquake-verified': earthquake.verified, 'glyphicon-remove earthquake-not-verified': !earthquake.verified }"></span>
+											</td>
+											<td>{{ earthquake.size }}</td>
+											<td>{{ timeSince(earthquake.occuredAt) }}</td>
+											<td>{{ earthquake.depth }}km</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<h3 ng-show="shaking" class="label label-warning pull-right">
+						New EQs
+					</h3>
+
+
+				</div>
+			</div>
+		</div>
+		<frame-credit></frame-credit>
+
+		<script src="thirdparty/jquery.min.js"></script>
+		<script src="bootstrap/js/bootstrap.min.js"></script>
+		<script src="thirdparty/moment.js"></script>
+		<script src="thirdparty/angular.min.js"></script>
+		<script src="thirdparty/highcharts.js"></script>
+		<script src="thirdparty/highcharts-3d.js"></script>
+		<script src="thirdparty/ui-bootstrap.min.js"></script>
+		<script src="thirdparty/ui-bootstrap-tpls.min.js"></script>
+
+		<script src="src/classes/earthquake.js"></script>
+
+		<script src="src/app.js"></script>
+		<script src="src/services/earthquake.js"></script>
+		<script src="src/controllers/map.js"></script>
+		<script src="src/directives/webcam.js"></script>
+		<script src="src/directives/calderaDrop.js"></script>
+		
+	</body>
+</html>
