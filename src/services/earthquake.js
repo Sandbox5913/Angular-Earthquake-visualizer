@@ -3,7 +3,9 @@ app.factory("EarthquakeService", [
     function($http) {
         return {
             getEarthquakesLastHours: function(hours, getAllQuakes) {
-                return $http.get("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=44.764037&longitude=-110.820208&maxradius=5").then(
+				
+
+                return $http.get("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=44.764037&longitude=-110.820208&maxradius=10&updatedafter="+ moment().format('YYYY/MM/DD')).then(
                     function(response) {
                         var earthquakes = [];
 
