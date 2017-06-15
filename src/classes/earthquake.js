@@ -4,6 +4,7 @@ function Earthquake(data) {
 	 
 	this.occuredAt =  new Date( moment(data.properties.time).unix() *1000 ).getTime(); // used as a key
     console.log(this.occuredAt);
+	this.type = data.properties.type;
 	this.latitude = parseFloat(data.geometry.coordinates[0]);
 	this.longitude = parseFloat(data.geometry.coordinates[1]);
 	this.depth = parseFloat(data.geometry.coordinates[2]);

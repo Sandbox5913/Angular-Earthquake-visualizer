@@ -63,6 +63,7 @@
 										<th>Magnitude</th>
 										<th>Time</th>
 										<th>Depth</th>
+										<th>Type</th>
 									</thead>
 									<tbody>
 										<tr ng-repeat="earthquake in earthquakes | orderBy: 'occuredAt':true | limitTo: numberOfEarthquakesDisplayedInTable" class="{{ earthquakeTableColor(earthquake) }}" ng-mouseenter="mouseOverEarthquake(earthquake)" ng-mouseleave="mouseOutEarthquake(earthquake)">
@@ -72,6 +73,7 @@
 											<td>{{ earthquake.size }}</td>
 											<td>{{ timeSince(earthquake.occuredAt) }}</td>
 											<td>{{ earthquake.depth }}km</td>
+											<td>{{ earthquake.type }}</td>
 										</tr>
 									</tbody>
 								</table>
