@@ -14,8 +14,11 @@ body {
 }
 
 
-
-
+/* Always set the map height explicitly to define the size of the div
+ * element that contains the map. */
+#map {
+  height: 100%;
+}
 
 
 
@@ -39,7 +42,7 @@ body {
 	top: 15px;
 	opacity: 0.5;
 }
-
+.angular-google-map-container { height: 400px; }
 .donate:hover {
 	opacity: 1;
 }
