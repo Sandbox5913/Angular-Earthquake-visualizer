@@ -5,7 +5,7 @@
 
 <script src="thirdparty/lodash.core.js"></script>
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-
+		<script src="https://maps.google.com/maps/api/js"></script>
 		<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 		<link rel="image_src" type="image/jpeg" href="http://baering.github.io/img/3dbulge_og.jpg" />
@@ -18,7 +18,7 @@
 				<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.js"></script>
 				<script src="thirdparty/ui-bootstrap.min.js"></script>
 		<script src="thirdparty/ui-bootstrap-tpls.min.js"></script>
-		<script src="https://maps.google.com/maps/api/js"></script>
+
 
 		<script src="thirdparty/highcharts.js"></script>
 		<script src="thirdparty/highcharts-3d.js"></script>
@@ -39,659 +39,64 @@
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 
 <script src="thirdparty/ng-map.min.js"></script>
+		<script src="src/controllers/map.js"></script>
 
-<script>
-
-
-
-
-var app = angular.module('BulgeApp', ['ngMap']);
-
-
-app.controller("MapController", [
-	"$scope", 
-	"EarthquakeService",
-	"$timeout",
-	
-	function($scope, EarthquakeService, $timeout) {
-
-		var earthquakes = {};
-		
-		var current3dChart;
-		var current2dChart;
-
-		$scope.numberOfEarthquakesDisplayedInTable = 50;
-		$scope.test = { center: { latitude: 45, longitude: -73 }, zoom: 8 };
-		$scope.graphDisplayHours = 24;
-		$scope.graphDisplayQuakeSize =0;
-		$scope.graphDisplayOnlyVerified = true;
-
-		$scope.refreshRate = 60;
-
-		$scope.earthquakes = [];
-
-		function earthquakeIsEqualOrLargerThanFilter(earthquake) {
-			return earthquake.size >= $scope.graphDisplayQuakeSize;
-		}
-
-		function earthquakeOccuredInLessThanHours(earthquake, nowInUnixTime) {
-			var hoursInMs = $scope.graphDisplayHours * 3600 * 1000;
-			var hoursAgo = nowInUnixTime - hoursInMs;
-
-			if(earthquake.occuredAt >= hoursAgo) {
-				return true;
-			}
-			return false;
-		}
-
-		function earthquakeMatchesFilters(earthquake, nowInUnixTime) {
-			if(earthquakeOccuredInLessThanHours(earthquake, nowInUnixTime)) {
-				if(earthquakeIsEqualOrLargerThanFilter(earthquake)) {
-					if(!$scope.graphDisplayOnlyVerified) {
-						return true;
-					}
-					else {
-						return earthquake.verified;
-					}
-				}
-			}
-			return false;
-		}
-
-		function redrawWithFilter() {
-			var earthquakesMatchingFilter = getChartCoordinatesForEarthquakes($scope.earthquakes);
-			makeNew3dChart(earthquakesMatchingFilter);
-			
-		}
-		
-		function get3dCoordinatesAs2d(data) {
-			var result = [];
-
-			for(var i = 0; i < data.length; ++i) {
-				var currentCoordinate = data[i];
-				var coordinate2d = create2dCoordinateFrom3dCoordinate(currentCoordinate);
-
-				result.push(coordinate2d);
-			}
-
-			return result;
-		}
-
-		var redrawTimeout;
-		$scope.graphFilterChange = function() {
-			if(redrawTimeout) {
-				$timeout.cancel(redrawTimeout);
-				redrawTimeout = undefined;
-			}
-			redrawTimeout = $timeout(redrawWithFilter, 1000);
-		};
-
-		function create2dCoordinateFrom3dCoordinate(coordinate3d) {
-
-			var result = {
-				x: coordinate3d.x,
-				y: latitudeLimits.min + (latitudeLimits.max - coordinate3d.z),
-				depth: coordinate3d.y,
-				richter: coordinate3d.richter,
-				timeAgo: coordinate3d.timeAgo,
-				marker: angular.copy(coordinate3d.marker)
-			};
-			result.marker.radius = 1 + (coordinate3d.richter / 6) * 8;
-			return result;
-		}
-
-
-
-		function createCoordinateFromEarthquake(earthquake, nowInUnixTime) {
-			var drawRadius = Math.pow(0.8 + earthquake.size, 2);
-			return {
-				x: earthquake.longitude, 
-				y: earthquake.depth, 
-				z: latitudeLimits.min + (latitudeLimits.max -earthquake.latitude),
-				richter: earthquake.size,
-				timeAgo: $scope.timeSince(earthquake.occuredAt),
-				marker: {
-					fillColor: earthquake.color(nowInUnixTime),
-					lineColor: "#123F3F",
-					lineWidth: 1,
-					radius: drawRadius
-				}
-			}
-		}
-
-		function getChartCoordinatesForEarthquakes(data) {
-			var nowInUnixTime = new Date().getTime();
-
-			var result = [];
-			for(var i = 0; i < data.length; ++i) {
-				var currentEarthquake = data[i];
-
-				if(earthquakeMatchesFilters(currentEarthquake, nowInUnixTime)) {
-					earthquakes[currentEarthquake.occuredAt].coordinateId = result.length;
-
-					result.push(createCoordinateFromEarthquake(currentEarthquake, nowInUnixTime));
-				}
-			}
-
-			return result.reverse();
-		}
-
-		function addEarthquakesToChart() {
-			if(!current3dChart  ) {
-				return;
-			}
-
-			redrawWithFilter();
-		}
-
-		var latitudeLimits = {
-			min: 100000000,
-			max: -100000000
-		};
-
-		var longitudeLimits = {
-			min: 100000000,
-			max: -100000000
-		};
-
-		var depthLimits = {
-			min: 100000000,
-			max: -100000000
-		};
-
-		function updateLimitsForObject(value, limit) {
-			if(value < limit.min) {
-				limit.min = value;
-			}
-			if(value > limit.max) {
-				limit.max = value;
-			}
-		}
-
-		function updateLimits(latitude, longitude, depth) {
-			updateLimitsForObject(latitude, latitudeLimits);
-			updateLimitsForObject(longitude, longitudeLimits);
-			updateLimitsForObject(depth, depthLimits);
-		}
-
-		$scope.allowShaking = true;
-		$scope.shaking = false;
-
-		// To not shake the webcam at page load
-		var firstShake = true;
-
-		function shakeWebCam(magnitude) {
-			if(firstShake) {
-				firstShake = false;
-				return;
-			}
-
-			if($scope.allowShaking) {
-				if(!$scope.shaking) {
-					$scope.shaking = true;
-					$timeout(function() {
-						$scope.shaking = false;
-					}, 1000 * magnitude);
-				}
-			}
-		}
-
-		function registerNewEarthquakes(data) {
-			var biggestNewEarthquakeMagnitude = -100000;
-			var newEarthquake = false;
-
-			for(var i = 0; i < data.length; ++i) {
-				var currentEarthquake = data[i];
-
-				if(earthquakes[currentEarthquake.occuredAt] === undefined) {
-					newEarthquake = true;
-
-					if(currentEarthquake.size > biggestNewEarthquakeMagnitude) {
-						biggestNewEarthquakeMagnitude = currentEarthquake.size;
-					}
-
-					$scope.earthquakes.push(currentEarthquake);
-					earthquakes[currentEarthquake.occuredAt] = currentEarthquake;
-					updateLimits(currentEarthquake.latitude, currentEarthquake.longitude, currentEarthquake.depth);
-				}
-			}
-
-			if(newEarthquake) {
-				shakeWebCam(biggestNewEarthquakeMagnitude);
-			}
-			return newEarthquake;
-		}
-
-		function updateEarthquake(earthquakeInMemory, newData) {
-			earthquakeInMemory.size = newData.size;
-			earthquakeInMemory.longitude = newData.longitude;
-			earthquakeInMemory.latitude = newData.latitude;
-			earthquakeInMemory.depth = newData.depth;
-			earthquakeInMemory.humanReadableLocation = newData.humanReadableLocation;
-			earthquakeInMemory.quality = newData.quality;
-			earthquakeInMemory.verified = newData.verified;
-		}
-
-		function newEarthquakeDataShouldBeSkipped(currentEarthquakeData, newEarthquakeData) {
-			if(currentEarthquakeData.quality > newEarthquakeData.quality) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-
-		function updateEarthquakes(data) {
-			var earthQuakesWereUpdated = false;
-			for(var i = 0; i < data.length; ++i) {
-				var currentEarthquake = data[i];
-
-				if(earthquakes[currentEarthquake.occuredAt]) {
-					var currentEarthquakeVerified = currentEarthquake.verified;
-					var currentVersionOfThisEarthquakeVerified = earthquakes[currentEarthquake.occuredAt].verified;
-
-					if(newEarthquakeDataShouldBeSkipped(earthquakes[currentEarthquake.occuredAt], currentEarthquake)) {
-						continue;
-					}
-					earthQuakesWereUpdated = true;
-					updateEarthquake(earthquakes[currentEarthquake.occuredAt], currentEarthquake);
-				}
-			}
-
-			if(registerNewEarthquakes(data)) {
-				earthQuakesWereUpdated = true;
-			}
-
-			return earthQuakesWereUpdated;
-		}
-
-		function getEarthquakes() {
-			EarthquakeService.getEarthquakesLastHours(2).then(function(data) {
-				if(updateEarthquakes(data)) {
-					console.log("New earthquakes detected from last update. Updating chart.");
-
-					addEarthquakesToChart();
-				}
-				$timeout(getEarthquakes, $scope.refreshRate * 1000);
-			});
-		}
-
-		function setInitialEarthquakeData(data) {
-			updateEarthquakes(data);
-			makeNew3dChart([]);
-		
-			if(data.length > 0) {
-				addEarthquakesToChart();
-			}
-
-			$scope.loading = false;
-		}
-
-		$scope.loading = true;
-		function init() {
-			EarthquakeService.getEarthquakesLastHours(48).then(function(data) {
-				setInitialEarthquakeData(data);
-				$timeout(getEarthquakes, $scope.refreshRate * 1000);
-			});
-		}
-		init();
-
-		$scope.mouseOverEarthquake = function(earthquake) {
-			var nowInUnixTime = new Date().getTime();
-
-			if(earthquakeMatchesFilters(earthquake, nowInUnixTime)) {
-				var index = (current3dChart.series[0].data.length-1) - earthquake.coordinateId;
-				var coordinate3d = createCoordinateFromEarthquake(earthquake, nowInUnixTime);
-
-				coordinate3d.marker.fillColor = "#33CC33";
-				coordinate3d.marker.radius *= 1.5;
-
-				current3dChart.series[0].data[index].update(coordinate3d);
-
-				var coordinate2d = create2dCoordinateFrom3dCoordinate(coordinate3d);
-				coordinate2d.marker.radius *= 2;
-				//current2dChart.series[0].data[index].update(coordinate2d);
-			}
-		}
-
-		$scope.mouseOutEarthquake = function(earthquake) {
-			var nowInUnixTime = new Date().getTime();
-
-			if(earthquakeMatchesFilters(earthquake, nowInUnixTime)) {
-				var index = (current3dChart.series[0].data.length-1) - earthquake.coordinateId;
-
-				var coordinate3d = createCoordinateFromEarthquake(earthquake, nowInUnixTime);
-				current3dChart.series[0].data[index].update(coordinate3d);
-
-				var coordinate2d = create2dCoordinateFrom3dCoordinate(coordinate3d);
-				//current2dChart.series[0].data[index].update(coordinate2d);
-			}
-		}
-
-		var alphaOn3dGraph, betaOn3dGraph;
-		function registerClickEventOnChart(chart) {
-			$(chart.container).bind('mousedown.hc touchstart.hc', function (e) {
-				e = chart.pointer.normalize(e);
-
-				var posX = e.pageX,
-				posY = e.pageY,
-				alpha = chart.options.chart.options3d.alpha,
-				beta = chart.options.chart.options3d.beta,
-				newAlpha,
-				newBeta,
-				sensitivity = 5; // lower is more sensitive
-
-				$(document).bind({
-					'mousemove.hc touchdrag.hc': function (e) {
-						// Run beta
-						newBeta = beta + (posX - e.pageX) / sensitivity;
-						newBeta = Math.min(100, Math.max(-100, newBeta));
-						chart.options.chart.options3d.beta = newBeta;
-
-						// Run alpha
-						newAlpha = alpha + (e.pageY - posY) / sensitivity;
-						newAlpha = Math.min(100, Math.max(-100, newAlpha));
-						chart.options.chart.options3d.alpha = newAlpha;
-
-						alphaOn3dGraph = newAlpha;
-						betaOn3dGraph = newBeta;
-
-						chart.redraw(false);
-					},
-					'mouseup touchend': function () {
-						$(document).unbind('.hc');
-					}
-				});
-			});
-		}
-
-		function makeNew3dChart(data) {
-			if(current3dChart) {
-				current3dChart.destroy();
-			}
-
-			if(!alphaOn3dGraph && !betaOn3dGraph) {
-				alphaOn3dGraph = 10;
-				betaOn3dGraph = 30;
-			}
-
-			current3dChart = new Highcharts.Chart({
-				chart: {
-					renderTo: 'volcano-chart',
-					
-                         backgroundColor:'rgba(42, 42, 43, 0.0 )',
-					margin: 100,
-					type: 'scatter',
-					options3d: {
-						enabled: true,
-						alpha: alphaOn3dGraph,
-						beta: betaOn3dGraph,
-						depth: 275,
-						viewDistance: 5,
-
-						frame: {
-							bottom: { size: 1, color: 'rgba(0,0,0,0.02)' },
-							back: { size: 1, color: 'rgba(0,0,0,0.04)' },
-							side: { size: 1, color: 'rgba(0,0,0,0.06)' }
-						}
-					},
-					height: window.innerHeight - 160,
-				},
-				tooltip: {
-					formatter: function () {
-						var result = "";
-		
-						result += "<p><strong>Happened</strong> " + this.point.timeAgo + ", ";
-						result += "<strong>magnitude</strong> " + this.point.richter + "</p> ";
-
-						return result;
-					}
-				},
-				title: {
-					text: null
-				},
-				plotOptions: {
-					scatter: {
-						animation: true,
-						width: 10,
-						height: 10,
-						depth: 10,
-						marker: {
-							states: {
-								hover: {
-									enabled: true,
-									radius: null,
-									radiusPlus: 0,
-									lineWidth: 1,
-									lineWidthPlus: 0,
-									fillColor: "#0f0",
-								}
-							}
-						}
-					}
-				},
-				yAxis: {
-					reversed: true,
-					min: depthLimits.min,
-					max: depthLimits.max,
-					labels: {
-						format: '{value} km',
-						enabled: true
-					},
-					title: "Depth"
-				},
-				xAxis: {
-				
-					labels: {
-						enabled: true
-					},
-					gridLineWidth: 1,
-					title: {
-						text: "Longitude"
-					}
-				},
-				zAxis: {
-					
-					min: latitudeLimits.min,
-					max: latitudeLimits.max
-				},
-				legend: {
-					enabled: true
-				},
-				series: [{
-					name: 'Earthquake location',
-					colorByPoint: false,
-					data: data,
-					turboThreshold: 13337
-				}],
-			});
-
-			registerClickEventOnChart(current3dChart);
-		}
-
-		
-
-          
-		$scope.earthquakeTableColor = function(earthquake) {
-			if(earthquake.size >= 3) {
-				return "danger";
-			}
-			else if(earthquake.size >= 2) {
-				return "warning";
-			}
-			else {
-				return "";
-			}
-		};
-
-		$scope.timeSince = function(unix) {
-
-		
-			return moment(unix).fromNow();
-		};
-		
-        $scope.map = {center: {latitude: 44, longitude: -111 }, zoom: 4 };
-        $scope.options = {scrollwheel: false};
-        $scope.circles = [
-            {
-                id: 1,
-                center: {
-                    latitude: 44,
-                    longitude: -111
-                },
-                radius: 500000,
-                stroke: {
-                    color: '#08B21F',
-                    weight: 2,
-                    opacity: 1
-                },
-                fill: {
-                    color: '#08B21F',
-                    opacity: 0.5
-                },
-                geodesic: true, // optional: defaults to false
-                draggable: true, // optional: defaults to false
-                clickable: true, // optional: defaults to true
-                editable: true, // optional: defaults to false
-                visible: true, // optional: defaults to true
-                control: {}
-            }
-        ];
-	
-	
-
-$scope.map = { center: { latitude: 44, longitude: -111 }, zoom: 5 };
-		$scope.registerEvent = function(type, action, label) {
-			ga("send", "event", type, action, label, 1);
-		}
-
-		// I know jQuery in angular controllers is a sin, sorry.
-		$(".webcam-wrapper").height($(".webcam-wrapper").width() * 0.56);
-	}
-	
-]);
-
-app.controller('test', [
-	"$scope",	
-	"EarthquakeService",
-	"$timeout",
-
-	function($scope,EarthquakeService,$timeout) 
-{
-
-    // $scope.map .. this exists after the map is initialized
-    var markers = [];
-	var earthquakes = {};
-$scope.earthquakes = [];
-
-
-
-	var time = 1000;
-	var executed =0;
-	
-	
-	
-	
-    var GenerateMapMarkers = function() {
-
-			EarthquakeService.getEarthquakesLastHours(48).then(function(data) {
-				getChartCoordinatesForEarthquakes(data);
-			});
-			$timeout(GenerateMapMarkers, time=time+executed);
-				executed =100000;
-		}
-
-	
-	function getChartCoordinatesForEarthquakes(data){
-
-	  $scope.date = Date();
-	       for(var i = 0; i < data.length; ++i) {
-		
-				var currentEarthquake = data[i];			
-
-		
-            var lat =   currentEarthquake.latitude;
-            var lng = currentEarthquake.longitude;
-            // You need to set markers according to google api instruction
-            // you don't need to learn ngMap, but you need to learn google map api v3
-            // https://developers.google.com/maps/documentation/javascript/markers
-			
-	
-            var latlng = new google.maps.LatLng(lng, lat);
-			
-			
-			 markers[i] = new google.maps.Marker({
-          position: latlng,
-         
-          title: currentEarthquake.humanReadableLocation +" mag: "  + currentEarthquake.size
-        });
-	  
-			//markers[i].setTitle(currentEarthquake.humanReadableLocation);
-            markers[i].setPosition(latlng);
-
-            markers[i].setMap($scope.map);
-        }    
-
-	}
-	 
-
-  
-		GenerateMapMarkers();
-
-}]); // mapController
-
-
-
-
-
-
-
-</script>
 
 		<script src="src/services/earthquake.js"></script>
-		<script src="src/controllers/map.js"></script>
+
 
 				<script src="src/classes/earthquake.js"></script>
 
 
 	</head>
 	<body>
-<div ng-controller="test">
-     <ng-map zoom="4" center="[44, -111]">
-        </ng-map>
-
-    </div>
 
 
 
 
 
 		<div ng-controller="MapController" class="container-fluid">
-		
+		     <ng-map zoom="4" center="[44, -111]">
+			
+			 
+			 
+			  <shape ng-repeat="b in earthquakes2 | orderBy: 'occuredAt':true " class="{{ earthquakeTableColor(b) }}"  name="circle"
+      stroke-color="#FF0000"
+      stroke-opacity="0.8"
+      stroke-weight="2"
+      fill-color="#FF0000"
+      fill-opacity="0.35"
+      center="[ {{ b.longitude }} ,  {{ b.latitude }}] "
+      radius="{{ b.drawRadius }}"
+on-mouseout="mouseOutEarthquake(b)"
+on-mouseover="mouseOverEarthquake(b)">
+	  
+  
+			 
+			 
+			 
+			 
+			 
+			 
+
+
+			 
+        </ng-map>
+
 			<div class="row">
 			
 				<div class="col-lg-5 col-md-12 col-xs-12">
 					<h2 ng-show="loading" class="text-center" style="color: #fff">Loading data</h2>
 
 					<div class="row">
-						<div class="col-md-4 col-xs-4">
-							<p>
-								Displaying 
-								<span ng-show="graphDisplayOnlyVerified"><strong>verified</strong> earthquakes</span>
-								<span ng-show="!graphDisplayOnlyVerified"><strong>all</strong> earthquakes</span>
-							</p>
-							<button class="btn btn-sm btn-default" ng-click="graphDisplayOnlyVerified = !graphDisplayOnlyVerified; graphFilterChange()">
-								<span ng-show="graphDisplayOnlyVerified">Show all earthquakes</span>
-								<span ng-show="!graphDisplayOnlyVerified">Show verified earthquakes</span>
-							</button>
-						</div>
+					
 						<div class="col-md-4 col-xs-4">
 							<p class="text-center" title="Move the slider below to change it">Graph displaying last <strong>{{ graphDisplayHours }}</strong> hours</p>
 							<input type="range" min="1" max="48" ng-model="graphDisplayHours" class="text-center graph-hours" ng-change="graphFilterChange()" />
 						</div>
 						<div class="col-md-4 col-xs-4">
 							<p class="text-center" title="Move the slider below to change it">Magnitude greater than <strong>{{ graphDisplayQuakeSize }}</strong></p>
-							<input type="range" min="0" max="4" step="0.2" ng-model="graphDisplayQuakeSize" class="text-center graph-hours" ng-change="graphFilterChange()" />
+							<input type="range" min="0" max="7" step="0.2" ng-model="graphDisplayQuakeSize" class="text-center graph-hours" ng-change="graphFilterChange()" />
 						</div>
 					</div>
 
@@ -713,7 +118,7 @@ $scope.earthquakes = [];
 										<th>Type</th>
 									</thead>
 									<tbody>
-										<tr ng-repeat="earthquake in earthquakes | orderBy: 'occuredAt':true | limitTo: numberOfEarthquakesDisplayedInTable" class="{{ earthquakeTableColor(earthquake) }}" ng-mouseenter="mouseOverEarthquake(earthquake)" ng-mouseleave="mouseOutEarthquake(earthquake)">
+										<tr ng-repeat="earthquake in earthquakes2 | orderBy: 'occuredAt':true | limitTo: numberOfEarthquakesDisplayedInTable" class="{{ earthquakeTableColor(earthquake) }}" ng-mouseenter="mouseOverEarthquake('',earthquake)" ng-mouseleave="mouseOutEarthquake('',earthquake)">
 											<td>
 												<span class="glyphicon" ng-class="{ 'glyphicon-ok earthquake-verified': earthquake.verified, 'glyphicon-remove earthquake-not-verified': !earthquake.verified }"></span>
 											</td>
