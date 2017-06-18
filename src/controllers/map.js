@@ -1,8 +1,9 @@
 
 
 
-
 var app = angular.module('BulgeApp', ['ngMap']);
+
+
 
 
 app.controller("MapController", [
@@ -361,6 +362,10 @@ var result2 = [];
 			if(earthquakeMatchesFilters(earthquake, nowInUnixTime)) {
 				var index = (current3dChart.series[0].data.length-1) - earthquake.coordinateId;
 				var coordinate3d = createCoordinateFromEarthquake(earthquake, nowInUnixTime);
+				
+
+
+				
 
 				coordinate3d.marker.fillColor = "#33CC33";
 				coordinate3d.marker.radius *= 1.5;
