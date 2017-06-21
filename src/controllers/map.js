@@ -600,8 +600,7 @@ $scope.map = { center: { latitude: 44, longitude: -111 }, zoom: 5 };
 		
 		
 		
-		// $scope.map .. this exists after the map is initialized
- 
+	
     var markers = [];
 
 		
