@@ -17,10 +17,10 @@ app.controller("MapController",
 
 		$scope.numberOfEarthquakesDisplayedInTable = 50;
 		
-		$scope.graphDisplayHours = 24;
+		$scope.graphDisplayHours = 48;
 		$scope.graphDisplayQuakeSize =0;
 		$scope.graphDisplayOnlyVerified = true;
-
+		$scope.radiusheatmap = 50;
 		$scope.refreshRate =60;
 
 		$scope.earthquakes = [];
@@ -183,7 +183,6 @@ var result3 = [];
 
 	NgMap.getMap().then(function(map) {
 
- 
 
           layer = $scope.map.heatmapLayers.taxiDataMap;
          layer.setData(result3);
@@ -648,7 +647,7 @@ $scope.map = { center: { latitude: 44, longitude: -111 }, zoom: 5 };
     }
 
     $scope.changeRadius = function() {
-      layer.set('radius', layer.get('radius') ? null : 70);
+      layer.set('radius',  $scope.radiusheatmap);
     }
 
      $scope.changeOpacity = function() {
