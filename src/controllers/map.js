@@ -166,13 +166,14 @@ var result3 = [];
             var latlng = new google.maps.LatLng(lng, lat);			
 
 
-			result3.push({location:latlng});
+	
 				
 					
 				
 				if(earthquakeMatchesFilters(currentEarthquake, nowInUnixTime)) {
-			
-				result2.push(currentEarthquake);	
+				result3.push({location:latlng});
+
+				    result2.push(currentEarthquake);	
 					earthquakes[currentEarthquake.occuredAt].coordinateId = result.length;
 					
 					result.push(createCoordinateFromEarthquake(currentEarthquake, nowInUnixTime));
@@ -648,16 +649,17 @@ $scope.map = { center: { latitude: 44, longitude: -111 }, zoom: 5 };
 
     $scope.changeRadius = function() {
       layer.set('radius',  $scope.radiusheatmap);
-	  $scope.graphFilterChange();
+	layer.set(' dissipating',  false);
     }
 
      $scope.changeOpacity = function() {
       layer.set('opacity', layer.get('opacity') ? null : 0.2);
+
+
     }
-		
-		 
-
-
+	
+	
+	
 
 
 
