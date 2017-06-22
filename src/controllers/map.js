@@ -648,6 +648,7 @@ $scope.map = { center: { latitude: 44, longitude: -111 }, zoom: 5 };
 
     $scope.changeRadius = function() {
       layer.set('radius',  $scope.radiusheatmap);
+	  $scope.graphFilterChange();
     }
 
      $scope.changeOpacity = function() {
