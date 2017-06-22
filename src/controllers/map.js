@@ -6,15 +6,12 @@ var app = angular.module('BulgeApp', ['ngMap']);
 
 
 
-app.controller("MapController", [
-	"$scope", 
-	"EarthquakeService",
-	"$timeout",
+app.controller("MapController", 
 	
-	function($scope, EarthquakeService, $timeout) {
-
+	function($scope, EarthquakeService, $timeout,NgMap  ) {
+    $scope.taxiData = [];
 		var earthquakes = {};
-		
+		 var layer;
 		var current3dChart;
 		var current2dChart;
 
@@ -158,17 +155,23 @@ app.controller("MapController", [
 
 			var result = [];
 var result2 = [];
+var result3 = [];
 			for(var i = 0; i < data.length; ++i) {
 				var currentEarthquake = data[i];
 
-									
+			 var lat =   currentEarthquake.latitude;
+            var lng = currentEarthquake.longitude;
+          
+	
+            var latlng = new google.maps.LatLng(lng, lat);			
 
 
-
+			result3.push({location:latlng});
 				
 					
 				
 				if(earthquakeMatchesFilters(currentEarthquake, nowInUnixTime)) {
+			
 				result2.push(currentEarthquake);	
 					earthquakes[currentEarthquake.occuredAt].coordinateId = result.length;
 					
@@ -176,6 +179,18 @@ var result2 = [];
 				}
 			}
 			$scope.earthquakes2 = result2.reverse();
+				$scope.taxidata  = result3;
+
+	NgMap.getMap().then(function(map) {
+
+ 
+
+          layer = $scope.map.heatmapLayers.taxiDataMap;
+         layer.setData(result3);
+
+  });
+				
+				
 			return result.reverse();
 		}
 		
@@ -587,6 +602,8 @@ var result2 = [];
         ];
 	
 	
+	
+
 
 $scope.map = { center: { latitude: 44, longitude: -111 }, zoom: 5 };
 		$scope.registerEvent = function(type, action, label) {
@@ -606,9 +623,58 @@ $scope.map = { center: { latitude: 44, longitude: -111 }, zoom: 5 };
 		
 
 		
+		    $scope.toggleHeatmap= function(event) {
+        layer.setMap(layer.getMap() ? null : $scope.map);
+    };
+
+    $scope.changeGradient = function() {
+      var gradient = [
+        'rgba(0, 255, 255, 0)',
+        'rgba(0, 255, 255, 1)',
+        'rgba(0, 191, 255, 1)',
+        'rgba(0, 127, 255, 1)',
+        'rgba(0, 63, 255, 1)',
+        'rgba(0, 0, 255, 1)',
+        'rgba(0, 0, 223, 1)',
+        'rgba(0, 0, 191, 1)',
+        'rgba(0, 0, 159, 1)',
+        'rgba(0, 0, 127, 1)',
+        'rgba(63, 0, 91, 1)',
+        'rgba(127, 0, 63, 1)',
+        'rgba(191, 0, 31, 1)',
+        'rgba(255, 0, 0, 1)'
+      ]
+      layer.set('gradient', layer.get('gradient') ? null : gradient);
+    }
+
+    $scope.changeRadius = function() {
+      layer.set('radius', layer.get('radius') ? null : 70);
+    }
+
+     $scope.changeOpacity = function() {
+      layer.set('opacity', layer.get('opacity') ? null : 0.2);
+    }
+		
+		 
+
+
+
+
+
+
+
+		
+		
+		
+		
+		
+		
+		
 	}
 	
-]);
+);
+
+
 
 
 

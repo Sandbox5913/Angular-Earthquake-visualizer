@@ -5,14 +5,13 @@
 
 <script src="thirdparty/lodash.core.js"></script>
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script src="https://maps.google.com/maps/api/js?key=AIzaSyAf0agYQYpTmdAq0ljpEnxpFgXvbitR_t8"></script>
+		<script src="https://maps.google.com/maps/api/js?key=AIzaSyAf0agYQYpTmdAq0ljpEnxpFgXvbitR_t8&libraries=visualization"></script>
 		<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 
 		<link rel="image_src" type="image/jpeg" href="http://baering.github.io/img/3dbulge_og.jpg" />
 
-		
-		
+
 		
 		
 		<script src="thirdparty/jquery.min.js"></script>
@@ -61,6 +60,7 @@
 		     <ng-map zoom="4" center="[44, -111]">
 			
 			 
+<heatmap-layer id="taxiDataMap" data="taxiData"></heatmap-layer>
 
 			  <shape   ng-repeat="b in earthquakes2 | orderBy: 'occuredAt':true " class="{{ earthquakeTableColor(b) }}"  name="circle"
 			  id="marker-{{$index}}"
@@ -77,15 +77,6 @@ on-mouseover="mouseOverEarthquake(b)"
 
 >
 
-			 
-			 
-			 
-			 
-			 
-			 
-
-
-			 
         </ng-map>
 
 			<div class="row">
@@ -109,6 +100,20 @@ on-mouseover="mouseOverEarthquake(b)"
 							<input type="range" min="1" max="200" ng-model="numberOfEarthquakesDisplayedInTable" class="text-center graph-hours"  />
 						</div>
 					</div>
+					 <div id="panel">
+		<div class="col-md-3 col-xs-3">			 
+      <input type="checkbox" ng-click="toggleHeatmap()"  >Toggle Heatmap</<input>
+	  </div>
+	  <div class="col-md-3 col-xs-3">
+     <input type="checkbox" ng-click="changeGradient()">Change gradient</input>
+	 </div>
+	 <div class="col-md-3 col-xs-3">
+      <input type="checkbox" ng-click="changeRadius()" >Change radius</input>
+	  </div>
+	  <div class="col-md-3 col-xs-3">
+    <input type="checkbox" ng-click="changeOpacity()" >Change opacity</input>
+	</div>
+    </div>
 
 					<div id="volcano-chart" style="width: 95%"></div>
 				</div>
@@ -125,36 +130,4 @@ on-mouseover="mouseOverEarthquake(b)"
 								<table class="table table-striped table-hover">
 									<thead>
 										<th>Verified</th>
-										<th>Magnitude</th>
-										<th>Time</th>
-										<th>Depth</th>
-										<th>Type</th>
-									</thead>
-									<tbody>
-										<tr ng-repeat="earthquake in earthquakes2 | orderBy: 'occuredAt':true | limitTo: numberOfEarthquakesDisplayedInTable" class="{{ earthquakeTableColor(earthquake) }}" ng-mouseenter="mouseOverEarthquake('',earthquake)" ng-mouseleave="mouseOutEarthquake('',earthquake)">
-											<td>
-												<span class="glyphicon" ng-class="{ 'glyphicon-ok earthquake-verified': earthquake.verified, 'glyphicon-remove earthquake-not-verified': !earthquake.verified }"></span>
-											</td>
-											<td>{{ earthquake.size }}</td>
-											<td>{{ timeSince(earthquake.occuredAt) }}</td>
-											<td>{{ earthquake.depth }}km</td>
-											<td><a href=" {{ earthquake.url }} ">{{ earthquake.type }}</a></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-					<h3 ng-show="shaking" class="label label-warning pull-right">
-						New EQs
-					</h3>
-
-				</div>
-			</div>
-		</div>
-		<frame-credit></frame-credit>
-
-
-		
-	</body>
-</html>
+										<th>Magnitude
