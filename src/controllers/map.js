@@ -133,11 +133,11 @@ app.controller("MapController",
 
 		function createCoordinateFromEarthquake(earthquake, nowInUnixTime) {
 			var drawRadius = Math.pow(0.8 + earthquake.size, 2);
-	
+
 		return {
 				x: earthquake.longitude, 
 				y: earthquake.depth, 
-				z: Math.round(latitudeLimits.min + (latitudeLimits.max -earthquake.latitude)),
+				z: latitudeLimits.min + (latitudeLimits.max -earthquake.latitude),
 				richter: earthquake.size,
 				timeAgo: $scope.timeSince(earthquake.occuredAt),
 				marker: {
@@ -158,11 +158,11 @@ app.controller("MapController",
 			var result2 = [];
 			var result3 = [];
 
-            console.log(data);
+           
 			
 			for(var i = 0; i < data.length; ++i) {
 				var currentEarthquake = data[i];
-			console.log(currentEarthquake);
+			
 			 var lat =   currentEarthquake.latitude;
             var lng = currentEarthquake.longitude;
                   	
@@ -175,7 +175,7 @@ app.controller("MapController",
 				if(earthquakeMatchesFilters(currentEarthquake, nowInUnixTime)) {
 				    result3.push({location:latlng});
 				    result2.push(currentEarthquake);	
-	
+	                   
 					earthquakes[currentEarthquake.occuredAt].coordinateId = result.length;
 
 					result.push(createCoordinateFromEarthquake(currentEarthquake, nowInUnixTime));
