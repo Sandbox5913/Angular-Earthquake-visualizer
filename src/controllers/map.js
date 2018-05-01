@@ -55,8 +55,6 @@ app.controller("MapController",
 
 		function redrawWithFilter() {
 			var earthquakesMatchingFilter = getChartCoordinatesForEarthquakes($scope.earthquakes);
-			
-			//domapstuff($scope.earthquakes);
 			makeNew3dChart(earthquakesMatchingFilter);
 			
 		}
@@ -135,10 +133,11 @@ app.controller("MapController",
 
 		function createCoordinateFromEarthquake(earthquake, nowInUnixTime) {
 			var drawRadius = Math.pow(0.8 + earthquake.size, 2);
-			return {
-				x: longitudeLimits.min + (longitudeLimits.max -earthquake.longitude),
+	
+		return {
+				x: earthquake.longitude, 
 				y: earthquake.depth, 
-				z: latitudeLimits.min + (latitudeLimits.max -earthquake.latitude),
+				z: Math.round(latitudeLimits.min + (latitudeLimits.max -earthquake.latitude)),
 				richter: earthquake.size,
 				timeAgo: $scope.timeSince(earthquake.occuredAt),
 				marker: {
@@ -148,49 +147,54 @@ app.controller("MapController",
 					radius: drawRadius
 				}
 			}
+
+	
 		}
 
 		function getChartCoordinatesForEarthquakes(data) {
 			var nowInUnixTime = new Date().getTime();
 
-			var result = [];
-var result2 = [];
-var result3 = [];
+			var result =  [];
+			var result2 = [];
+			var result3 = [];
+
+            console.log(data);
+			
 			for(var i = 0; i < data.length; ++i) {
 				var currentEarthquake = data[i];
-
+			console.log(currentEarthquake);
 			 var lat =   currentEarthquake.latitude;
             var lng = currentEarthquake.longitude;
-          
-	
-            var latlng = new google.maps.LatLng(lng, lat);			
+                  	
 
-
+			var latlng = new google.maps.LatLng(lat, lng);	
 	
 				
 					
 				
 				if(earthquakeMatchesFilters(currentEarthquake, nowInUnixTime)) {
-				result3.push({location:latlng});
-
+				    result3.push({location:latlng});
 				    result2.push(currentEarthquake);	
+	
 					earthquakes[currentEarthquake.occuredAt].coordinateId = result.length;
-					
+
 					result.push(createCoordinateFromEarthquake(currentEarthquake, nowInUnixTime));
+
+
+
 				}
 			}
-			$scope.earthquakes2 = result2.reverse();
+			    $scope.earthquakes2 = result2.reverse();
 				$scope.taxidata  = result3;
 
-	NgMap.getMap().then(function(map) {
+					NgMap.getMap().then(function(map) {
 
 
-          layer = $scope.map.heatmapLayers.taxiDataMap;
-         layer.setData(result3);
+						layer = $scope.map.heatmapLayers.taxiDataMap;
+						layer.setData(result3);
 
-  });
-				
-				
+				});
+			
 			return result.reverse();
 		}
 		
@@ -278,6 +282,7 @@ var result3 = [];
 
 					$scope.earthquakes.push(currentEarthquake);
 					earthquakes[currentEarthquake.occuredAt] = currentEarthquake;
+					
 					updateLimits(currentEarthquake.latitude, currentEarthquake.longitude, currentEarthquake.depth);
 				}
 			}
@@ -320,7 +325,7 @@ var result3 = [];
 					var currentVersionOfThisEarthquakeVerified = earthquakes[currentEarthquake.occuredAt].verified;
 					
 					
-2
+
 					
 					
 
@@ -520,7 +525,8 @@ var result3 = [];
 					title: "Depth"
 				},
 				xAxis: {
-				
+					min: longitudeLimits.min,
+					max: longitudeLimits.max,
 					labels: {
 						enabled: true
 					},
@@ -530,13 +536,9 @@ var result3 = [];
 					}
 				},
 				zAxis: {
-					
+					reversed:true,
 					min: latitudeLimits.min,
-					max: latitudeLimits.max,
-					gridLineWidth: 1,
-					title: {
-						text: "Latitude"
-					},
+					max: latitudeLimits.max
 				},
 				legend: {
 					enabled: true
