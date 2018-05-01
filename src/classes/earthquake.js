@@ -6,11 +6,11 @@ function Earthquake(data) {
 
 	this.type = data.properties.type;
 	this.url = data.properties.url;
-	this.latitude = parseFloat(data.geometry.coordinates[0]);
-	this.longitude = parseFloat(data.geometry.coordinates[1]);
+	this.latitude = parseFloat(data.geometry.coordinates[1]);
+	this.longitude = parseFloat(data.geometry.coordinates[0]);
 	this.depth = parseFloat(data.geometry.coordinates[2]);
 	this.size = parseFloat(data.properties.mag);
-	 this.drawRadius = (Math.exp(this.size/1.01-0.13))*1000;
+	this.drawRadius = (Math.exp(this.size/1.01-0.13))*1000;
 	this.verified = 1;
 
 	var humanReadable = "";
