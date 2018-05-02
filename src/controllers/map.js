@@ -174,7 +174,8 @@ app.controller("MapController",
 				
 				if(earthquakeMatchesFilters(currentEarthquake, nowInUnixTime)) {
 				    result3.push({location:latlng});
-				    result2.push(currentEarthquake);	
+					result2.push(currentEarthquake);
+						
 	                   
 					earthquakes[currentEarthquake.occuredAt].coordinateId = result.length;
 
@@ -189,7 +190,7 @@ app.controller("MapController",
 
 					NgMap.getMap().then(function(map) {
 
-
+					
 						layer = $scope.map.heatmapLayers.taxiDataMap;
 						layer.setData(result3);
 
@@ -391,10 +392,10 @@ app.controller("MapController",
 				coordinate3d.marker.radius *= 1.5;
 
 				current3dChart.series[0].data[index].update(coordinate3d);
-
-				var coordinate2d = create2dCoordinateFrom3dCoordinate(coordinate3d);
-				coordinate2d.marker.radius *= 2;
-				//current2dChart.series[0].data[index].update(coordinate2d);
+				$scope.earthquakes2[index].drawRadius  *= 3 ;
+				$scope.earthquakes2[index].colorhover ="#33CC33";
+			
+	
 			}
 		}
 
@@ -406,7 +407,8 @@ app.controller("MapController",
 
 				var coordinate3d = createCoordinateFromEarthquake(earthquake, nowInUnixTime);
 				current3dChart.series[0].data[index].update(coordinate3d);
-
+				$scope.earthquakes2[index].drawRadius  /= 3 ;
+				$scope.earthquakes2[index].colorhover = "#FF0000";
 				var coordinate2d = create2dCoordinateFrom3dCoordinate(coordinate3d);
 				//current2dChart.series[0].data[index].update(coordinate2d);
 			}

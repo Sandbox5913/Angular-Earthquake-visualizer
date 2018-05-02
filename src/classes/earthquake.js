@@ -12,7 +12,7 @@ function Earthquake(data) {
 	this.size = parseFloat(data.properties.mag);
 	this.drawRadius = (Math.exp(this.size/1.01-0.13))*1000;
 	this.verified = 1;
-
+	this.colorhover = "#FF0000";
 	var humanReadable = "";
 
 	this.humanReadableLocation = data.properties.place;
