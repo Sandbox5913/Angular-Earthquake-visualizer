@@ -392,7 +392,7 @@ app.controller("MapController",
 		init();
 
 		$scope.mouseOverEarthquake = function (e, earthquake) {
-			console.log(earthquake.occuredAt);
+		
 			var nowInUnixTime = new Date().getTime();
 
 			if (earthquakeMatchesFilters(earthquake, nowInUnixTime)) {
