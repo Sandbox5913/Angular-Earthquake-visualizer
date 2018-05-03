@@ -50,10 +50,7 @@
 
 			<heatmap-layer id="taxiDataMap" data="taxiData"></heatmap-layer>
 
-			<shape ng-repeat="b in earthquakes2 | orderBy: 'occuredAt':true " class="{{ earthquakeTableColor(b) }}" name="circle" id="marker-{{$index}}"
-			    stroke-color="#FF0000" stroke-opacity="0.8" stroke-weight="2" fill-color="#FF0000" fill-opacity="0.35" center="[ {{ b.latitude }} ,  {{ b.longitude }}] "
-			    radius="{{ b.drawRadius }}" on-mouseout="mouseOutEarthquake(b)" on-mouseover="mouseOverEarthquake(b)">
-
+			
 		</ng-map>
 
 		<div class="row">
