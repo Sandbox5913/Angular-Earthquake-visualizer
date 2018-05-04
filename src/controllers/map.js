@@ -262,7 +262,7 @@ app.controller("MapController",
 		};
 
 		function updateLimitsForObject(value, limit) {
-			
+		
 			if (value < limit.min) {
 				limit.min = value;
 			}
@@ -273,9 +273,12 @@ app.controller("MapController",
 
 		function updateLimits(latitude, longitude, depth) {
 		
+			var point = new  google.maps.LatLng(latitude,longitude);
+			if($scope.map.getBounds().contains(point)){
 			updateLimitsForObject(latitude, latitudeLimits);
 			updateLimitsForObject(longitude, longitudeLimits);
 			updateLimitsForObject(depth, depthLimits);
+			}
 			
 		}
 
@@ -591,8 +594,7 @@ app.controller("MapController",
 				},
 				yAxis: {
 					reversed: true,
-					min: depthLimits.min,
-					max: depthLimits.max,
+					
 					labels: {
 						format: '{value} km',
 						enabled: true
@@ -600,8 +602,8 @@ app.controller("MapController",
 					title: "Depth"
 				},
 				xAxis: {
-					min: longitudeLimits.min,
-					max: longitudeLimits.max,
+					
+					
 					labels: {
 						enabled: true
 					},
@@ -612,8 +614,8 @@ app.controller("MapController",
 				},
 				zAxis: {
 					reversed: true,
-					min: latitudeLimits.min,
-					max: latitudeLimits.max
+					
+					
 				},
 				legend: {
 					enabled: true
