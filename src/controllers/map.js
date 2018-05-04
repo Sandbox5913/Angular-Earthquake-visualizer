@@ -36,6 +36,11 @@ app.controller("MapController",
 		function earthquakeIsEqualOrLargerThanFilter(earthquake) {
 			return earthquake.size >= $scope.graphDisplayQuakeSize;
 		}
+	
+		function earthquakeIsinBB(earthquake) {
+			var point = new  google.maps.LatLng(earthquake.latitude,earthquake.longitude);
+			return $scope.map.getBounds().contains(point);
+		}
 
 		function earthquakeOccuredInLessThanHours(earthquake, nowInUnixTime) {
 			var hoursInMs = $scope.graphDisplayHours * 3600 * 1000;
@@ -48,6 +53,7 @@ app.controller("MapController",
 		}
 
 		function earthquakeMatchesFilters(earthquake, nowInUnixTime) {
+			if(earthquakeIsinBB(earthquake)){
 			if (earthquakeOccuredInLessThanHours(earthquake, nowInUnixTime)) {
 				if (earthquakeIsEqualOrLargerThanFilter(earthquake)) {
 					if (!$scope.graphDisplayOnlyVerified) {
@@ -57,11 +63,13 @@ app.controller("MapController",
 					}
 				}
 			}
+		}
 			return false;
 		}
 
 		function redrawWithFilter() {
 			var earthquakesMatchingFilter = getChartCoordinatesForEarthquakes($scope.earthquakes);
+			
 			makeNew3dChart(earthquakesMatchingFilter);
 
 		}
@@ -85,6 +93,8 @@ app.controller("MapController",
 				var lng = currentEarthquake.longitude;
 
 			
+
+
 								var latlng = new google.maps.LatLng(lat, lng);
 
 
@@ -179,7 +189,7 @@ app.controller("MapController",
 			var result2 = [];
 			var result3 = [];
 
-
+		
 
 			for (var i = 0; i < data.length; ++i) {
 				var currentEarthquake = data[i];
@@ -190,8 +200,8 @@ app.controller("MapController",
 
 				var latlng = new google.maps.LatLng(lat, lng);
 
-
-
+			
+				
 
 				if (earthquakeMatchesFilters(currentEarthquake, nowInUnixTime)) {
 					result3.push({
@@ -252,6 +262,7 @@ app.controller("MapController",
 		};
 
 		function updateLimitsForObject(value, limit) {
+			
 			if (value < limit.min) {
 				limit.min = value;
 			}
@@ -261,9 +272,11 @@ app.controller("MapController",
 		}
 
 		function updateLimits(latitude, longitude, depth) {
+		
 			updateLimitsForObject(latitude, latitudeLimits);
 			updateLimitsForObject(longitude, longitudeLimits);
 			updateLimitsForObject(depth, depthLimits);
+			
 		}
 
 		$scope.allowShaking = true;
@@ -311,7 +324,8 @@ app.controller("MapController",
 					$scope.earthquakes.push(currentEarthquake);
 					earthquakes[currentEarthquake.occuredAt] = currentEarthquake;
 
-					updateLimits(currentEarthquake.latitude, currentEarthquake.longitude, currentEarthquake.depth);
+			
+				updateLimits(currentEarthquake.latitude, currentEarthquake.longitude, currentEarthquake.depth);
 				}
 			}
 
@@ -372,7 +386,11 @@ app.controller("MapController",
 		}
 
 		function getEarthquakes() {
-			EarthquakeService.getEarthquakesLastHours(2).then(function (data) {
+
+
+
+
+			EarthquakeService.getEarthquakesLastHours(2,true).then(function (data) {
 				if (updateEarthquakes(data)) {
 					console.log("New earthquakes detected from last update. Updating chart.");
 					
@@ -398,12 +416,19 @@ app.controller("MapController",
 		function init() {
 			EarthquakeService.getEarthquakesLastHours(48).then(function (data) {
 			
-				if (typeof google === 'object' && typeof google.maps === 'object'){
-
+			
 				
 				setInitialEarthquakeData(data);
-				}
+				
 				$timeout(getEarthquakes, $scope.refreshRate * 1000);
+
+				$scope.map.addListener('dragend', function() {
+
+					window.setTimeout(function() {
+						redrawWithFilter();
+						
+					}, 3000);
+				  });
 			});
 		}
 		init();
@@ -491,6 +516,7 @@ app.controller("MapController",
 
 		function makeNew3dChart(data) {
 			if (current3dChart) {
+				
 				current3dChart.destroy();
 			}
 

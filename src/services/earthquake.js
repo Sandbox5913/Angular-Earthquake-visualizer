@@ -1,8 +1,9 @@
 app.factory("EarthquakeService", [
     "$http",
-    function($http) {
+    function($http,test,test2) {
         return {
             getEarthquakesLastHours: function(hours, getAllQuakes) {
+ 
 				//+"&maxlatitude=34.683&minlatitude=12.726&maxlongitude=-129.199&minlongitude=-177.012"
                
                 return $http.get("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter="+ moment().subtract(1, "days").format('YYYY/MM/DD')).then(
