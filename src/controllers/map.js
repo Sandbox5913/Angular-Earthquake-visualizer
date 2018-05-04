@@ -11,6 +11,7 @@ app.controller("MapController",
 		var layer;
 		var current3dChart;
 		var current2dChart;
+		var hidecircles;
 
 		$scope.numberOfEarthquakesDisplayedInTable = 50;
 
@@ -23,6 +24,14 @@ app.controller("MapController",
 		$scope.earthquakes = [];
 		$scope.earthquakes2 = [];
 		$scope.earthquakes3  = [];
+
+
+
+
+
+
+
+
 
 		function earthquakeIsEqualOrLargerThanFilter(earthquake) {
 			return earthquake.size >= $scope.graphDisplayQuakeSize;
@@ -60,12 +69,14 @@ app.controller("MapController",
 		function domapstuff(data) {
 		
 	
-
+		
 		for (var i = 1; i <$scope.earthquakes3.length; ++i) {
 
 			$scope.earthquakes3[i].setMap(null);
 
-		}
+		
+	}
+
 			for (var i = 1; i < data.length; ++i) {
 				
 				var currentEarthquake = data[i];
@@ -76,18 +87,6 @@ app.controller("MapController",
 			
 								var latlng = new google.maps.LatLng(lat, lng);
 
-			//	$scope.earthquakes3[i] = new google.maps.Marker({	
-			//		title: currentEarthquake.humanReadableLocation +" magnitude: "  + currentEarthquake.size,				
-			//		icon: {					
-			//		  path: google.maps.SymbolPath.CIRCLE,
-			//		  scale: (Math.exp(mag / 1.6 - 0.13)) ,
-			//		  fillColor: '#FF0000',
-			//		  fillOpacity: 0.3,
-			//		  strokeColor: '#FF0000',
-			//		  strokeWeight: 1
-			//		}	
-								
-			//	  });
 
 			$scope.earthquakes3[i] =  new google.maps.Circle({
 				strokeColor: '#FF0000',
@@ -96,14 +95,11 @@ app.controller("MapController",
 				fillColor: '#FF0000',
 				fillOpacity: 0.35,
 				center: latlng,
-				radius: mag
+				radius: mag,
+				map: $scope.map
 			  });
 
 
-				//  $scope.earthquakes3.addListener('mouseover', $scope.mouseOverEarthquake());
-
-				//$scope.earthquakes3[i].setPosition(latlng);
-				$scope.earthquakes3[i].setMap($scope.map);
 						
 
 			}
@@ -215,7 +211,9 @@ app.controller("MapController",
 			}
 			$scope.earthquakes2 = result2.reverse();
 
-			domapstuff(result2);
+			if(!hidecircles){
+			domapstuff(result2,true);
+			}
 			$scope.taxidata = result3;
 
 			NgMap.getMap().then(function (map) {
@@ -377,7 +375,7 @@ app.controller("MapController",
 			EarthquakeService.getEarthquakesLastHours(2).then(function (data) {
 				if (updateEarthquakes(data)) {
 					console.log("New earthquakes detected from last update. Updating chart.");
-
+					
 					addEarthquakesToChart();
 				}
 				$timeout(getEarthquakes, $scope.refreshRate * 1000);
@@ -399,7 +397,12 @@ app.controller("MapController",
 
 		function init() {
 			EarthquakeService.getEarthquakesLastHours(48).then(function (data) {
+			
+				if (typeof google === 'object' && typeof google.maps === 'object'){
+
+				
 				setInitialEarthquakeData(data);
+				}
 				$timeout(getEarthquakes, $scope.refreshRate * 1000);
 			});
 		}
@@ -421,7 +424,7 @@ app.controller("MapController",
 				coordinate3d.marker.radius *= 1.5;
 
 				current3dChart.series[0].data[index].update(coordinate3d);
-				console.log($scope.earthquakes3[index]);
+			
 				$scope.earthquakes3[index].setOptions({strokeColor: "#33CC33",fillColor:"#33CC33",radius:$scope.earthquakes3[index].getRadius()*20});
 			
 				
@@ -619,51 +622,7 @@ app.controller("MapController",
 			return moment(unix).fromNow();
 		};
 
-		$scope.map = {
-			center: {
-				latitude: 44,
-				longitude: -111
-			},
-			zoom: 4
-		};
-		$scope.options = {
-			scrollwheel: false
-		};
-		$scope.circles = [{
-			id: 1,
-			center: {
-				latitude: 44,
-				longitude: -111
-			},
-			radius: 500000,
-			stroke: {
-				color: '#08B21F',
-				weight: 2,
-				opacity: 1
-			},
-			fill: {
-				color: '#08B21F',
-				opacity: 0.5
-			},
-			geodesic: true, // optional: defaults to false
-			draggable: true, // optional: defaults to false
-			clickable: true, // optional: defaults to true
-			editable: true, // optional: defaults to false
-			visible: true, // optional: defaults to true
-			control: {}
-		}];
-
-
-
-
-
-		$scope.map = {
-			center: {
-				latitude: 44,
-				longitude: -111
-			},
-			zoom: 5
-		};
+		
 		$scope.registerEvent = function (type, action, label) {
 			ga("send", "event", type, action, label, 1);
 		}
@@ -717,19 +676,30 @@ app.controller("MapController",
 		}
 
 
+$scope.hidecircles= function(checkbox){
+	
+	hidecircles = checkbox;
+		if(checkbox){
+
+		
+	
+			for (var b = 1; b < $scope.earthquakes3.length; ++b) {
+
+						$scope.earthquakes3[b].setMap(null);
+					}
+} else { 
+	
+	redrawWithFilter();
+}
+	
+
+}
+
+}
 
 
 
 
 
-
-
-
-
-
-
-
-
-	}
 
 );
