@@ -86,7 +86,7 @@ app.controller("MapController",
 	}
 
 			for (var i = 1; i < data.length; ++i) {
-				
+				var nowInUnixTime = new Date().getTime();
 				var currentEarthquake = data[i];
 				var mag = currentEarthquake.drawRadius;
 				var lat = currentEarthquake.latitude;
@@ -99,10 +99,10 @@ app.controller("MapController",
 
 
 			$scope.earthquakes3[i] =  new google.maps.Circle({
-				strokeColor: '#FF0000',
+				strokeColor: data[i].color(nowInUnixTime),
 				strokeOpacity: 0.8,
 				strokeWeight: 2,
-				fillColor: '#FF0000',
+				fillColor: data[i].color(nowInUnixTime),
 				fillOpacity: 0.35,
 				center: latlng,
 				radius: mag,
@@ -205,7 +205,8 @@ app.controller("MapController",
 
 				if (earthquakeMatchesFilters(currentEarthquake, nowInUnixTime)) {
 					result3.push({
-						location: latlng
+						location: latlng,
+						weight : currentEarthquake.size
 					});
 					
 					result2.push(currentEarthquake);
@@ -452,9 +453,11 @@ app.controller("MapController",
 				coordinate3d.marker.radius *= 1.5;
 
 				current3dChart.series[0].data[index].update(coordinate3d);
+			if(!hidecircles && $scope.earthquakes3[index] ){
+
 			
 				$scope.earthquakes3[index].setOptions({strokeColor: "#33CC33",fillColor:"#33CC33",radius:$scope.earthquakes3[index].getRadius()*20});
-			
+			}
 				
 
 			}

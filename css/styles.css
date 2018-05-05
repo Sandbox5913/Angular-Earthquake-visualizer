@@ -36,12 +36,7 @@ body {
 	height: 320px;
 }
 
-.donate {
-	display: inline;
-	position: absolute;
-	top: 15px;
-	opacity: 0.5;
-}
+
 .angular-google-map-container { height: 400px; }
 .donate:hover {
 	opacity: 1;
