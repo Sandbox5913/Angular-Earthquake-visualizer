@@ -15,9 +15,8 @@ app.controller("MapController",
 
 		$scope.numberOfEarthquakesDisplayedInTable = 50;
 
-		$scope.graphDisplayHours =12;
+		$scope.graphDisplayHours =4;
 		$scope.graphDisplayQuakeSize = 0;
-		$scope.graphDisplayOnlyVerified = true;
 		$scope.radiusheatmap = 50;
 		$scope.refreshRate = 60;
 
@@ -86,16 +85,22 @@ app.controller("MapController",
 	}
 
 			for (var i = 1; i < data.length; ++i) {
+				
 				var nowInUnixTime = new Date().getTime();
 				var currentEarthquake = data[i];
 				var mag = currentEarthquake.drawRadius;
+				var mag =(Math.exp(currentEarthquake.size/1.01-0.13))*400 ;
 				var lat = currentEarthquake.latitude;
 				var lng = currentEarthquake.longitude;
 
 			
 
 
-								var latlng = new google.maps.LatLng(lat, lng);
+			var latlng = new google.maps.LatLng(lat, lng);
+			
+	
+			//	content:  currentEarthquake.humanReadableLocation +" mag: "  + currentEarthquake.size
+			
 
 
 			$scope.earthquakes3[i] =  new google.maps.Circle({
@@ -109,8 +114,10 @@ app.controller("MapController",
 				map: $scope.map
 			  });
 
-
-						
+			
+		
+	
+		
 
 			}
 
@@ -426,12 +433,12 @@ app.controller("MapController",
 				
 				$timeout(getEarthquakes, $scope.refreshRate * 1000);
 
-				$scope.map.addListener('dragend', function() {
+				$scope.map.addListener('idle', function() {
 
 					window.setTimeout(function() {
 						redrawWithFilter();
 						
-					}, 3000);
+					});
 				  });
 			});
 		}
@@ -456,7 +463,7 @@ app.controller("MapController",
 			if(!hidecircles && $scope.earthquakes3[index] ){
 
 			
-				$scope.earthquakes3[index].setOptions({strokeColor: "#33CC33",fillColor:"#33CC33",radius:$scope.earthquakes3[index].getRadius()*20});
+				$scope.earthquakes3[index].setOptions({strokeColor: "#33CC33",fillColor:"#33CC33"});
 			}
 				
 
@@ -478,7 +485,12 @@ app.controller("MapController",
 				$scope.earthquakes2[index].colorhover = "#FF0000";
 				var coordinate2d = create2dCoordinateFrom3dCoordinate(coordinate3d);
 				//current2dChart.series[0].data[index].update(coordinate2d);
-				$scope.earthquakes3[index].setOptions({strokeColor: "#FF0000",fillColor:"#FF0000",radius:$scope.earthquakes3[index].getRadius()/20});
+				if(!hidecircles && $scope.earthquakes3[index] ){
+
+			
+					$scope.earthquakes3[index].setOptions({strokeColor: "#FF0000",fillColor:"#FF0000"});
+				}
+			
 			}
 		}
 
@@ -638,6 +650,7 @@ app.controller("MapController",
 
 
 		$scope.earthquakeTableColor = function (earthquake) {
+			
 			if (earthquake.size >= 3) {
 				return "danger";
 			} else if (earthquake.size >= 2) {
