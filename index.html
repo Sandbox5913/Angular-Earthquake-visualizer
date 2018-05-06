@@ -137,7 +137,7 @@
 										<td>{{ timeSince(earthquake.occuredAt) }}</td>
 										<td>{{ earthquake.depth }}km</td>
 										<td>
-											<a href=" {{ earthquake.url }} ">{{ earthquake.type }}</a>
+											<a href=" {{ earthquake.url }} " >{{ earthquake.type }}</a>
 										</td>
 									</tr>
 								</tbody>
@@ -145,15 +145,10 @@
 						</div>
 					</div>
 				</div>
-				<h3 ng-show="shaking" class="label label-warning pull-right">
-					New EQs
-				</h3>
-
+		
 			</div>
 		</div>
 	</div>
-	<frame-credit></frame-credit>
-
 
 
 </body>

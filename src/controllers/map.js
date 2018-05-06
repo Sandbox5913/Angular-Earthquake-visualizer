@@ -76,27 +76,25 @@ app.controller("MapController",
 
 		function domapstuff(data) {
 		
-	
 		
-		for (var i = 1; i <$scope.earthquakes3.length; ++i) {
+		
+		for (var i = 0; i <$scope.earthquakes3.length; ++i) {
 
 			$scope.earthquakes3[i].setMap(null);
 
 		
 	}
 
-			for (var i = 1; i < data.length; ++i) {
+			for (var i = 0; i < data.length; ++i) {
 				
 				var nowInUnixTime = new Date().getTime();
 				var currentEarthquake = data[i];
-				var mag =(Math.exp(currentEarthquake.size/1.01-0.13))*400 ;
-				var lat = currentEarthquake.latitude;
-				var lng = currentEarthquake.longitude;
-
+		
+			
 			
 
 
-			var latlng = new google.maps.LatLng(lat, lng);
+			var latlng = new google.maps.LatLng(currentEarthquake.latitude, currentEarthquake.longitude);
 			
 	
 			//	content:  currentEarthquake.humanReadableLocation +" mag: "  + currentEarthquake.size
@@ -110,12 +108,11 @@ app.controller("MapController",
 				fillColor: data[i].color(nowInUnixTime),
 				fillOpacity: 0.35,
 				center: latlng,
-				radius: mag,
+				radius: (Math.exp(currentEarthquake.size/1.01-0.13))*400 ,
 				map: $scope.map
 			  });
 
-			
-		
+	
 	
 		
 
@@ -671,12 +668,8 @@ app.controller("MapController",
 			ga("send", "event", type, action, label, 1);
 		}
 
-		// I know jQuery in angular controllers is a sin, sorry.
 
-
-		$(".webcam-wrapper").height($(".webcam-wrapper").width() * 0.56);
-
-
+		
 
 
 		
@@ -727,7 +720,7 @@ $scope.hidecircles= function(checkbox){
 
 		
 	
-			for (var b = 1; b < $scope.earthquakes3.length; ++b) {
+			for (var b = 0; b < $scope.earthquakes3.length; ++b) {
 
 						$scope.earthquakes3[b].setMap(null);
 					}
