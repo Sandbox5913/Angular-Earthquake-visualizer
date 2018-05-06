@@ -17,6 +17,7 @@ app.controller("MapController",
 
 		$scope.graphDisplayHours =4;
 		$scope.graphDisplayQuakeSize = 0;
+		$scope.graphDisplayOnlyVerified = false;
 		$scope.radiusheatmap = 50;
 		$scope.refreshRate = 60;
 
@@ -88,7 +89,6 @@ app.controller("MapController",
 				
 				var nowInUnixTime = new Date().getTime();
 				var currentEarthquake = data[i];
-				var mag = currentEarthquake.drawRadius;
 				var mag =(Math.exp(currentEarthquake.size/1.01-0.13))*400 ;
 				var lat = currentEarthquake.latitude;
 				var lng = currentEarthquake.longitude;
