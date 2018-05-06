@@ -120,6 +120,7 @@
 							<table class="table table-striped table-hover">
 								<thead>
 									<th>Verified</th>
+									<th>Location</th>
 									<th>Magnitude</th>
 									<th>Time</th>
 									<th>Depth</th>
@@ -131,6 +132,7 @@
 										<td>
 											<span class="glyphicon" ng-class="{ 'glyphicon-ok earthquake-verified': earthquake.verified, 'glyphicon-remove earthquake-not-verified': !earthquake.verified }"></span>
 										</td>
+										<td>{{ earthquake.humanReadableLocation }}</td>
 										<td>{{ earthquake.size }}</td>
 										<td>{{ timeSince(earthquake.occuredAt) }}</td>
 										<td>{{ earthquake.depth }}km</td>
