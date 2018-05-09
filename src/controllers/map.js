@@ -11,7 +11,7 @@ app.controller("MapController",
 		var layer;
 		var current3dChart;
 		var current2dChart;
-		var hidecircles;
+	
 
 		$scope.numberOfEarthquakesDisplayedInTable = 50;
 
@@ -20,7 +20,8 @@ app.controller("MapController",
 		$scope.graphDisplayOnlyVerified = false;
 		$scope.radiusheatmap = 50;
 		$scope.refreshRate = 60;
-
+		var hidecircles;
+		
 		$scope.earthquakes = [];
 		$scope.earthquakes2 = [];
 		$scope.earthquakes3  = [];
@@ -88,6 +89,7 @@ app.controller("MapController",
 			for (var i = 0; i < data.length; ++i) {
 				
 				var nowInUnixTime = new Date().getTime();
+				
 				var currentEarthquake = data[i];
 		
 			
